@@ -30,10 +30,14 @@ import uuid
 from websocket import create_connection
 import ssl
 import time
+import tweepy
 
 from tornado.options import define, options
 
 define("port", default=9988, help="run on the given port", type=int)
+
+
+api = tweepy.API(auth)
 
 
 class Application(tornado.web.Application):
@@ -46,11 +50,21 @@ class Application(tornado.web.Application):
             xsrf_cookies=True,
         )
         super(Application, self).__init__(handlers, **settings)
+        myStreamListener = MyStreamListener()
+        myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
+        myStream.filter(track=['python'], is_async=True)
 
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html", messages=WSHandler.cache)
+
+
+class MyStreamListener(tweepy.StreamListener):
+
+    def on_status(self, status):
+        print(status.text)
+        WSHandler.on_message(self, {"body": status.text})
 
 
 class WSHandler(tornado.websocket.WebSocketHandler):
@@ -109,13 +123,18 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         logging.info("got message %r", message)
-        parsed = tornado.escape.json_decode(message)
-        ws_msg =  "{1}--{0}".format(parsed["body"],self.get_one_msg())
-        # chat = {"id": str(uuid.uuid4()), "body": parsed["body"]}
-        chat = {"id": str(uuid.uuid4()), "body": ws_msg}
-        chat["html"] = tornado.escape.to_basestring(
-            self.render_string("message.html", message=chat)
-        )
+        if(type(message) == dict):
+            ws_msg = message.get("body", "")
+            chat = {"id": str(uuid.uuid4()), "body": ws_msg}
+            template = """<div class="message" id="m{id}">{body}</div>"""
+            chat["html"] = template.format(id=chat['id'], body=chat['body'])
+        else:
+            parsed = tornado.escape.json_decode(message)
+            ws_msg = "{1}--{0}".format(parsed.get("body", ""),
+                                       self.get_one_msg())
+            chat = {"id": str(uuid.uuid4()), "body": ws_msg}
+            chat["html"] = tornado.escape.to_basestring(
+                self.render_string("message.html", message=chat))
 
         WSHandler.update_cache(chat)
         WSHandler.send_updates(chat)
