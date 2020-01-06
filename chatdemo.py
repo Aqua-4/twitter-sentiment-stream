@@ -31,6 +31,8 @@ from websocket import create_connection
 import ssl
 import time
 import tweepy
+import asyncio
+
 
 from tornado.options import define, options
 
@@ -53,6 +55,7 @@ class Application(tornado.web.Application):
         myStreamListener = MyStreamListener()
         myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
         myStream.filter(track=['python'], is_async=True)
+        # myStream.filter(follow=["145125358"], is_async=True)
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -106,17 +109,33 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         WSHandler.waiters.remove(self)
 
-    @classmethod
-    def update_cache(cls, chat):
-        cls.cache.append(chat)
-        if len(cls.cache) > cls.cache_size:
-            cls.cache = cls.cache[-cls.cache_size:]
+    # @classmethod
+    # def update_cache(cls, chat):
+    #     cls.cache.append(chat)
+    #     if len(cls.cache) > cls.cache_size:
+    #         cls.cache = cls.cache[-cls.cache_size:]
 
-    @classmethod
-    def send_updates(cls, chat):
-        logging.info("sending message to %d waiters", len(cls.waiters))
-        for waiter in cls.waiters:
+    # @classmethod
+    # def send_updates(cls, chat):
+    #     logging.info("sending message to %d waiters", len(cls.waiters))
+    #     for waiter in cls.waiters:
+    #         try:
+    #             waiter.write_message(chat)
+    #         except:
+    #             logging.error("Error sending message", exc_info=True)
+
+    def update_cache(self, chat):
+        WSHandler.cache.append(chat)
+        if len(WSHandler.cache) > WSHandler.cache_size:
+            WSHandler.cache = WSHandler.cache[-WSHandler.cache_size:]
+
+    def send_updates(self, chat):
+        logging.info("sending message to %d waiters", len(WSHandler.waiters))
+        for waiter in WSHandler.waiters:
             try:
+                waiter.write_message(chat)
+            except RuntimeError:
+                asyncio.set_event_loop(asyncio.new_event_loop())
                 waiter.write_message(chat)
             except:
                 logging.error("Error sending message", exc_info=True)
@@ -126,8 +145,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if(type(message) == dict):
             ws_msg = message.get("body", "")
             chat = {"id": str(uuid.uuid4()), "body": ws_msg}
-            template = """<div class="message" id="m{id}">{body}</div>"""
+            template = """<div class="message" id="m{id}">{body}</div>\n"""
             chat["html"] = template.format(id=chat['id'], body=chat['body'])
+            # WSHandler.update_cache(self,chat)
         else:
             parsed = tornado.escape.json_decode(message)
             ws_msg = "{1}--{0}".format(parsed.get("body", ""),
@@ -135,51 +155,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             chat = {"id": str(uuid.uuid4()), "body": ws_msg}
             chat["html"] = tornado.escape.to_basestring(
                 self.render_string("message.html", message=chat))
-
-        WSHandler.update_cache(chat)
-        WSHandler.send_updates(chat)
-
-
-# class ChatSocketHandler(tornado.websocket.WebSocketHandler):
-#     waiters = set()
-#     cache = []
-#     cache_size = 200
-
-#     def get_compression_options(self):
-#         # Non-None enables compression with default options.
-#         return {}
-
-#     def open(self):
-#         ChatSocketHandler.waiters.add(self)
-
-#     def on_close(self):
-#         ChatSocketHandler.waiters.remove(self)
-
-#     @classmethod
-#     def update_cache(cls, chat):
-#         cls.cache.append(chat)
-#         if len(cls.cache) > cls.cache_size:
-#             cls.cache = cls.cache[-cls.cache_size:]
-
-#     @classmethod
-#     def send_updates(cls, chat):
-#         logging.info("sending message to %d waiters", len(cls.waiters))
-#         for waiter in cls.waiters:
-#             try:
-#                 waiter.write_message(chat)
-#             except:
-#                 logging.error("Error sending message", exc_info=True)
-
-#     def on_message(self, message):
-#         logging.info("got message %r", message)
-#         parsed = tornado.escape.json_decode(message)
-#         chat = {"id": str(uuid.uuid4()), "body": parsed["body"]}
-#         chat["html"] = tornado.escape.to_basestring(
-#             self.render_string("message.html", message=chat)
-#         )
-
-#         ChatSocketHandler.update_cache(chat)
-#         ChatSocketHandler.send_updates(chat)
+        # import pdb; pdb.set_trace()
+        WSHandler.update_cache(self, chat)
+        WSHandler.send_updates(self, chat)
 
 
 def main():
