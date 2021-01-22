@@ -18,7 +18,8 @@
 Authentication, error handling, etc are left as an exercise for the reader :)
 pip install websocket_client
 """
-
+from tornado.options import define, options
+from websocket import create_connection
 import logging
 import tornado.escape
 import tornado.ioloop
@@ -27,19 +28,34 @@ import tornado.web
 import tornado.websocket
 import os.path
 import uuid
-from websocket import create_connection
 import ssl
 import time
-import tweepy
 import asyncio
+from tweepy import Stream
+from tweepy.streaming import StreamListener
+from tweepy import OAuthHandler
 
+import pandas as pd
+from datetime import datetime
+from sqlalchemy import create_engine
 
-from tornado.options import define, options
+table_name = "tweet_dump"
+target = os.path.join('dbs', f'{table_name}.db')
+loc_conn = f'sqlite:///{target}'
+loc_engine = create_engine(loc_conn)
+
 
 define("port", default=9988, help="run on the given port", type=int)
 
 
-api = tweepy.API(auth)
+consumer_key = 'LAjTEjBk13C9C5gb8MDWyuS6v'
+consumer_secret = 'EdvCXEfPLn9WNUJY5zo6QoaSm7y7mZAubVrGMjOwFcBVQBBx2l'
+access_token = '147895435-alx1Xd58t4zWZenhrTRDgLiXCkJplT9fQJhsyyFR'
+access_secret = 'x9h7ZyjZfwwdnAoQAkuTlprpwJsztEeDwrokK7K6Ti7lz'
+
+
+auth = OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_secret)
 
 
 class Application(tornado.web.Application):
@@ -53,9 +69,12 @@ class Application(tornado.web.Application):
         )
         super(Application, self).__init__(handlers, **settings)
         myStreamListener = MyStreamListener()
-        myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
-        myStream.filter(track=['python'], is_async=True)
-        # myStream.filter(follow=["145125358"], is_async=True)
+        myStream = Stream(auth, listener=myStreamListener,
+                          tweet_mode='extended')
+        # myStream = Stream(auth=api.auth, listener=myStreamListener)
+        myStream.filter(track=['#nse', '#bse', '#nifty', '#twitter'],
+                        languages=["en"],  is_async=True)
+        # # myStream.filter(follow=["145125358"], is_async=True)
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -63,11 +82,26 @@ class MainHandler(tornado.web.RequestHandler):
         self.render("index.html", messages=WSHandler.cache)
 
 
-class MyStreamListener(tweepy.StreamListener):
+class MyStreamListener(StreamListener):
 
     def on_status(self, status):
-        print(status.text)
-        WSHandler.on_message(self, {"body": status.text})
+        try:
+            if 'extended_tweet' in status._json:
+                txt = status._json['extended_tweet']['full_text']
+            elif 'retweeted_status' in status._json and 'extended_tweet' in status._json['retweeted_status']:
+                txt = status._json['retweeted_status']['extended_tweet']['full_text']
+            elif 'retweeted_status' in status._json:
+                txt = status._json['retweeted_status']['full_text']
+            else:
+                txt = status._json['full_text']
+        except:
+            txt = status.text
+
+        df = pd.DataFrame(data={'timestamp': [datetime.now()], 'txt': [txt]})
+        df.to_sql(f'{table_name}', index=False,
+                  if_exists='append', con=loc_engine)
+        WSHandler.on_message(
+            self, {"body": txt})
 
 
 class WSHandler(tornado.websocket.WebSocketHandler):
@@ -92,37 +126,21 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         return tmp_list
 
     def get_one_msg(self):
-        ws = create_connection("wss://echo.websocket.org",
-                               sslopt={"cert_reqs": ssl.CERT_NONE})
-        ws.send("python hello--{}".format(time.time()))
-        txt = ws.recv()
-        ws.close()
+        try:
+            ws = create_connection("wss://echo.websocket.org",
+                                   sslopt={"cert_reqs": ssl.CERT_NONE})
+            ws.send("python hello--{}".format(time.time()))
+            txt = ws.recv()
+            ws.close()
+        except:
+            txt = "Hello"
         return txt
-
-    # def get_compression_options(self):
-    #     # Non-None enables compression with default options.
-    #     return {}
 
     def open(self):
         WSHandler.waiters.add(self)
 
     def on_close(self):
         WSHandler.waiters.remove(self)
-
-    # @classmethod
-    # def update_cache(cls, chat):
-    #     cls.cache.append(chat)
-    #     if len(cls.cache) > cls.cache_size:
-    #         cls.cache = cls.cache[-cls.cache_size:]
-
-    # @classmethod
-    # def send_updates(cls, chat):
-    #     logging.info("sending message to %d waiters", len(cls.waiters))
-    #     for waiter in cls.waiters:
-    #         try:
-    #             waiter.write_message(chat)
-    #         except:
-    #             logging.error("Error sending message", exc_info=True)
 
     def update_cache(self, chat):
         WSHandler.cache.append(chat)
@@ -145,7 +163,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if(type(message) == dict):
             ws_msg = message.get("body", "")
             chat = {"id": str(uuid.uuid4()), "body": ws_msg}
-            template = """<div class="message" id="m{id}">{body}</div>\n"""
+            template = """<div class="message alert alert-info" id="{id}">{body}</div>\n"""
             chat["html"] = template.format(id=chat['id'], body=chat['body'])
             # WSHandler.update_cache(self,chat)
         else:
