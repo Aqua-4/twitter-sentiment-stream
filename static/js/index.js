@@ -54,22 +54,27 @@ function update_uri(obj) {
 
 function plot_home() {
 
-  // ajax_call("../get_queries?section=home_chart")
-  ajax_call("../get_meta")
-    .done((meta) => {
-      console.log(meta);
+  $.when(
+    // $.ajax({
+    //   url: "../get_donut",
+    //   method: "POST",
+    //   dataType: 'json'
+    // })
+    //   .done(function (data) {
+    //     $("#donut_chart_holder").attr("src", data.img)
+    //   })
+    // ,
+    $.ajax({
+      url: "../get_pie",
+      method: "POST",
+      dataType: 'json'
+    })
+      .done(function (data) {
+        $("#pie_chart_holder").attr("src", data.img)
+      })
+  )
+    .then(function () {
       $(".loader").addClass("d-none");
     })
-
-
-  $.ajax({
-    url: "../get_donut",
-    method: "GET",
-    dataType: 'json'
-  })
-    .done(function (data) {
-      $("#visual").attr("src", data.img)
-    })
-
 
 }

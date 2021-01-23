@@ -14,7 +14,7 @@ meta:
     - "#twitter"
 
 variables:
-  connection_string: "f'sqlite:///dbs/tweet_dump?charset=utf8"
+  connection_string: "sqlite:///dbs/tweet_dump.db"
 
   variable_list:
     - s_no
@@ -56,6 +56,11 @@ url:
     pattern: /get_donut
     handler: FunctionHandler
     function: get_donut
+
+  get_pie:
+    pattern: /get_pie
+    handler: FunctionHandler
+    function: get_pie
 
   # xxxxxx------------------------FN Handler----------------------------xxxxx
 

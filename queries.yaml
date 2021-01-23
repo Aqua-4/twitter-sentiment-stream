@@ -8,3 +8,12 @@ sample:
   WHERE win_id='{win_id}'
   "
 
+
+drop_duplicate_query:
+  query:
+    DELETE FROM tweet_dump
+      WHERE rowid
+      NOT IN
+        ( SELECT MIN(rowid)
+        FROM tweet_dump
+        GROUP BY txt )

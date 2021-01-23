@@ -9,6 +9,21 @@ from insight_utils import *
 
 CONFIG = yaml.safe_load(open('config.yaml', "r", encoding='utf-8'))
 queries = yaml.safe_load(open('queries.yaml', "r", encoding='utf-8'))
+url = CONFIG.get('variables')['connection_string']
+engine = create_engine(url)
+
+
+drop_duplicate_query = """
+DELETE FROM tweet_dump
+    WHERE rowid NOT IN
+    (
+    SELECT MIN(rowid)
+    FROM tweet_dump
+    GROUP BY txt
+    )
+"""
+drop_duplicate_query = queries.get('drop_duplicate_query').get('query')
+engine.execute(drop_duplicate_query)
 
 
 class Methods:
@@ -28,3 +43,6 @@ class Methods:
 
     def get_donut(self):
         return json.dumps({'img': get_donut_bs64()})
+
+    def get_pie(self):
+        return json.dumps({'img': get_pie_bs64()})
