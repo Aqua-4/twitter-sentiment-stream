@@ -1,0 +1,4 @@
+pycryptodome==3.9.8
+pybase64
+tornado
+ldap3

@@ -1,0 +1,69 @@
+# Deploy config
+
+port: 9988
+debug: true
+
+meta:
+  app_name: Twitter-Sentiment-Analysis
+  app_desc: APP DESC
+  app_logo: img/logo.png
+  hashtags:
+    - "#nse"
+    - "#bse"
+    - "#nifty"
+    - "#twitter"
+
+variables:
+  connection_string: "f'sqlite:///dbs/tweet_dump?charset=utf8"
+
+  variable_list:
+    - s_no
+    - area
+
+url:
+  # xxxxxxx-------------------AUTH-----------------------------xxxxxxxxx
+  # login_page:
+  #   pattern: /login/
+  #   handler: AuthLoginHandler
+  #   mechanism: basic
+
+  # logout_page:
+  #   pattern: /logout/
+  #   handler: AuthLogoutHandler
+  # xxxxxxx-------------------AUTH-----------------------------xxxxxxxxx
+
+  # xxxxxx------------------------Files----------------------------xxxxx
+  app_home:
+    pattern: /home/
+    handler: FileHandler
+    path: static/html/index.html
+
+  # xxxxxx------------------------Files----------------------------xxxxx
+
+  # xxxxxx------------------------FN Handler----------------------------xxxxx
+
+  get_meta:
+    pattern: /get_meta
+    handler: FunctionHandler
+    function: get_meta
+
+  get_data:
+    pattern: /get_data
+    handler: FunctionHandler
+    function: get_data
+
+  # xxxxxx------------------------FN Handler----------------------------xxxxx
+
+  # xxxxxx------------------------FORM Handler--------------------------xxxxx
+
+  get_queries:
+    pattern: /get_queries
+    handler: FormHandler
+  # xxxxxx------------------------FORM Handler--------------------------xxxxx
+
+  # xxxxxx------------------------UPLOAD Handler--------------------------xxxxx
+  # upload_excel:
+  #   pattern: /upload
+  #   handler: UploadHandler
+  #   path: static/uploads
+# xxxxxx------------------------UPLOAD Handler--------------------------xxxxx
