@@ -4,6 +4,7 @@ import yaml
 import re
 from datetime import datetime, timedelta
 import os
+from insight_utils import *
 
 
 CONFIG = yaml.safe_load(open('config.yaml', "r", encoding='utf-8'))
@@ -20,7 +21,10 @@ class Methods:
 
     def get_data(self):
         # read csv from data folder
-        path = os.path.join("static","data","data.csv")
+        path = os.path.join("static", "data", "data.csv")
         df = pd.read_csv(path)
         # return csv JSON
         return df.to_json(orient="records")
+
+    def get_donut(self):
+        return json.dumps({'img': get_donut_bs64()})

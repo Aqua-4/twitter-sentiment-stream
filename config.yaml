@@ -52,6 +52,11 @@ url:
     handler: FunctionHandler
     function: get_data
 
+  get_donut:
+    pattern: /get_donut
+    handler: FunctionHandler
+    function: get_donut
+
   # xxxxxx------------------------FN Handler----------------------------xxxxx
 
   # xxxxxx------------------------FORM Handler--------------------------xxxxx
@@ -60,7 +65,6 @@ url:
     pattern: /get_queries
     handler: FormHandler
   # xxxxxx------------------------FORM Handler--------------------------xxxxx
-
   # xxxxxx------------------------UPLOAD Handler--------------------------xxxxx
   # upload_excel:
   #   pattern: /upload

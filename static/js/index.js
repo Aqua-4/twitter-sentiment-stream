@@ -61,15 +61,15 @@ function plot_home() {
       $(".loader").addClass("d-none");
     })
 
-  ajax_call("../get_data").done(function (data) {
-    console.log(data);
 
-    $('#table_template')
-      .one("template", function () {
-        plot_bar({ selector: "#chart_placeholder", data: data })
-      })
-      .template({ data: data }, { target: "#table_placeholder" })
-
+  $.ajax({
+    url: "../get_donut",
+    method: "GET",
+    dataType: 'json'
   })
+    .done(function (data) {
+      $("#visual").attr("src", data.img)
+    })
+
 
 }

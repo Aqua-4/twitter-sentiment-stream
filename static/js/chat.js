@@ -27,11 +27,6 @@ $(document).ready(function () {
     }
   });
 
-  // setInterval(function () {
-  //     newMessage($(this));
-  // }, 5000);
-
-  $("#message").select();
   updater.start();
 });
 
@@ -59,16 +54,8 @@ var updater = {
     updater.socket = new WebSocket(url);
     updater.socket.onmessage = function (event) {
       $("#tweet_div").text(JSON.parse(event.data).body)
-      updater.showMessage(JSON.parse(event.data));
+      plot_home()
     }
   },
 
-  showMessage: function (message) {
-    var existing = $("#m" + message.id);
-    if (existing.length > 0) return;
-    var node = $(message.html);
-    node.hide();
-    $("#inbox").append(node);
-    node.slideDown();
-  }
 };
