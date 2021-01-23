@@ -54,11 +54,6 @@
 
   <div id="page_placeholder" class="container-fluid p-0">
 
-    <form action="/upload" method="POST">
-      <input type="file" id="myFile" name="filename">
-      <input type="submit">
-    </form>
-
     {% set tab = (handler.request.arguments).get("tab",[b"home"])[0].decode('utf-8') %}
     {% set page_path = "{}.html".format(tab) %}
     {% module Template(page_path) %}
