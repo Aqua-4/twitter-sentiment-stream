@@ -23,6 +23,7 @@ wheels/
 pip-wheel-metadata/
 share/python-wheels/
 static/node_modules/
+*.lock
 *.egg-info/
 .installed.cfg
 *.egg

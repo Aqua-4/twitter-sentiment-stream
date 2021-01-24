@@ -55,21 +55,22 @@ function update_uri(obj) {
 function plot_home() {
 
   $.when(
-    // $.ajax({
-    //   url: "../get_donut",
-    //   method: "POST",
-    //   dataType: 'json'
-    // })
-    //   .done(function (data) {
-    //     $("#donut_chart_holder").attr("src", data.img)
-    //   })
-    // ,
+    $.ajax({
+      url: "../get_donut",
+      method: "POST",
+      dataType: 'json'
+    })
+      .done(function (data) {
+        plot_donut({ selector: "#donut_chart_holder", data: data, height: 500 })
+      })
+    ,
     $.ajax({
       url: "../get_pie",
       method: "POST",
       dataType: 'json'
     })
       .done(function (data) {
+
         $("#pie_chart_holder").attr("src", data.img)
       })
   )

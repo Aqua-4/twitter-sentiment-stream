@@ -199,3 +199,15 @@ def get_pie_bs64():
     pngImageB64String += base64.b64encode(pi_fig.getvalue()).decode('utf8')
 
     return pngImageB64String
+
+
+def get_donut_json():
+
+    x = tweet_meta()
+
+    _json = [
+        {'name': 'positive', 'count': x.positive, 'percentage': x.positive},
+        {'name': 'negative', 'count': x.negative, 'percentage': x.negative},
+        {'name': 'neutral', 'count': x.neutral, 'percentage': x.neutral}
+    ]
+    return _json
