@@ -17,7 +17,7 @@
       </button>
     </div> -->
 
-    <div class="row-cols-2 row justify-content-around">
+    <div class="row-cols-lg-2 row-cols-xl-2 row justify-content-around">
       <div id="donut_chart_holder" class="v-max"></div>
       <img id="word_cloud_holder" class="img-fluid mx-auto" alt="word-cloud">
     </div>
@@ -27,16 +27,14 @@
 
   <div id="input">
     <form action="/a/message/new" method="post" id="messageform">
-      <table>
-        <tr>
-          <td><input type="text" name="body" id="message" style="width:500px"></td>
-          <td style="padding-left:5px">
-            <input type="submit" value="{{ _(" Post") }}">
-            <input type="hidden" name="next" value="{{ request.path }}">
-            {% module xsrf_form_html() %}
-          </td>
-        </tr>
-      </table>
+
+      <div class="input-group mb-3">
+        <input type="text" name="body" id="message" class="form-control" placeholder="Insert text here">
+        <input type="submit" value="{{ _(" Post") }}">
+        <input type="hidden" name="next" value="{{ request.path }}">
+        {% module xsrf_form_html() %}
+      </div>
+
     </form>
   </div>
 
