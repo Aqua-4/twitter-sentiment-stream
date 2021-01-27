@@ -22,11 +22,19 @@ function plot_donut(config) {
 
 
   let min_dim = d3.min([height, width])
-  let outer_rad = (radius - (radius * 0.25)) < 1 ? 10 : (radius - (radius * 0.25))
+  let outer_rad = (radius - (radius * 0.25))
+  let inner_rad = (min_dim / 2) - margin.top - margin.bottom
+
+  // adjustment for smaller devices
+  if ((radius - (radius * 0.25)) < 1) {
+    outer_rad = 10
+    inner_rad = 5
+    margin = { top: 0, right: 0, bottom: 0, left: 0 }
+  }
 
   var arc = d3.arc()
     .outerRadius(outer_rad)
-    .innerRadius(Math.abs((min_dim / 2) - margin.top - margin.bottom));
+    .innerRadius(inner_rad);
 
   var pie = d3.pie()
     .sort(null)
