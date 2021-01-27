@@ -64,19 +64,20 @@ function plot_home() {
         plot_donut({ selector: "#donut_chart_holder", data: data, height: 500 })
       })
     ,
+    // http://bl.ocks.org/lorenzopub/820bec1dafa6a5cd11aa23c1268edcbf
+    $("#word_cloud_holder").fadeTo("slow", 0.05)
+    ,
     $.ajax({
       url: "../get_wordcloud",
       method: "POST",
       dataType: 'json'
     })
       .done(function (data) {
-        // $("#pie_chart_holder").empty()
-        // $("#pie_chart_holder").append(data)
-
-        $("#pie_chart_holder").attr("src", data.img)
-
+        // $("#word_cloud_holder").empty()
+        // $("#word_cloud_holder").append(data)
+        $("#word_cloud_holder").fadeTo("slow", 1)
+        $("#word_cloud_holder").attr("src", data.img)
       })
-
   )
     .then(function () {
       $(".loader").addClass("d-none");

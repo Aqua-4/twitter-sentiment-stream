@@ -12,6 +12,10 @@ meta:
     - "#bse"
     - "#nifty"
     - "#nifty50"
+    - "#astrazen"
+    - "#affle"
+    - "#mcx"
+    - "#spicejet"
 
 variables:
   connection_string: "sqlite:///dbs/tweet_dump.db"
