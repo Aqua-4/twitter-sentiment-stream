@@ -65,14 +65,18 @@ function plot_home() {
       })
     ,
     $.ajax({
-      url: "../get_pie",
+      url: "../get_wordcloud",
       method: "POST",
       dataType: 'json'
     })
       .done(function (data) {
+        // $("#pie_chart_holder").empty()
+        // $("#pie_chart_holder").append(data)
 
         $("#pie_chart_holder").attr("src", data.img)
+
       })
+
   )
     .then(function () {
       $(".loader").addClass("d-none");

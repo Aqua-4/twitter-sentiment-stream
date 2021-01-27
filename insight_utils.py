@@ -53,6 +53,7 @@ class tweet_meta:
 
     def __init__(self, filter=True):
         self.df = pd.read_sql_table(table_name, con=loc_engine)
+        self.df.drop_duplicates(inplace=True, subset=['txt'])
         if filter:
             self.df['txt'] = self.df['txt'].map(self.remove_rt).map(self.rt)
             self.df['txt'] = self.df['txt'].str.lower()
@@ -105,13 +106,117 @@ class tweet_meta:
         self.positive_list = pd.DataFrame(self.positive_list)
 
 
+def get_wordcloud_bs64():
+    def create_wordcloud(text):
+        mask = np.array(Image.open("cloud.png"))
+        stopwords = set(STOPWORDS)
+        wc = WordCloud(background_color="white",
+                       mask=mask,
+                       max_words=3000,
+                       stopwords=stopwords,
+                       repeat=False)
+        wc.generate(str(text))
+        # wc.to_file("wc.png")
+        # print("Word Cloud Saved Successfully")
+        # path = "wc.png"
+        # display(Image.open(path))
+        return wc.to_image()
+
+    x = tweet_meta()
+    tw_list = pd.DataFrame(x.tweet_list)
+    tw_list["text"] = tw_list[0]
+
+    tw_list['text_len'] = tw_list['text'].astype(str).apply(len)
+    tw_list['text_word_count'] = tw_list['text'].apply(
+        lambda x: len(str(x).split()))
+
+    # Removing Punctuation
+
+    def remove_punct(text):
+        text = "".join(
+            [char for char in text if char not in string.punctuation])
+        text = re.sub('[0-9]+', '', text)
+        return text
+
+    tw_list['punct'] = tw_list['text'].apply(lambda x: remove_punct(x))
+
+    # Appliyng tokenization
+
+    def tokenization(text):
+        text = re.split(r'\W+', text)
+        return text
+
+    tw_list['tokenized'] = tw_list['punct'].apply(
+        lambda x: tokenization(x.lower()))
+
+    # Removing stopwords
+    stopword = nltk.corpus.stopwords.words('english')
+
+    def remove_stopwords(text):
+        text = [word for word in text if word not in stopword]
+        return text
+
+    tw_list['nonstop'] = tw_list['tokenized'].apply(
+        lambda x: remove_stopwords(x))
+
+    # Appliyng Stemmer
+    ps = nltk.PorterStemmer()
+
+    def stemming(text):
+        text = [ps.stem(word) for word in text]
+        return text
+
+    tw_list['stemmed'] = tw_list['nonstop'].apply(lambda x: stemming(x))
+
+    # Cleaning Text
+
+    def clean_text(text):
+        # remove puntuation
+        text_lc = "".join([word.lower()
+                           for word in text if word not in string.punctuation])
+        text_rc = re.sub('[0-9]+', '', text_lc)
+        tokens = re.split(r'\W+', text_rc)    # tokenization
+        # remove stopwords and stemming
+        text = [ps.stem(word) for word in tokens if word not in stopword]
+        return text
+
+    # Appliyng Countvectorizer
+    countVectorizer = CountVectorizer(analyzer=clean_text)
+    countVectorizer.fit_transform(tw_list['text'])
+
+    # Function to ngram
+    def get_top_n_gram(corpus, ngram_range, n=None):
+        vec = CountVectorizer(ngram_range=ngram_range,
+                              stop_words='english').fit(corpus)
+        bag_of_words = vec.transform(corpus)
+        sum_words = bag_of_words.sum(axis=0)
+        words_freq = [(word, sum_words[0, idx])
+                      for word, idx in vec.vocabulary_.items()]
+        words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
+        return words_freq[:n]
+
+    n2_bigrams = get_top_n_gram(tw_list['text'], (2, 2), 20)
+
+    # n3_trigrams = get_top_n_gram(tw_list['text'], (3, 3), 20)
+    # create_wordcloud(n3_trigrams)
+    # return create_wordcloud(n2_bigrams)
+
+    cloud = create_wordcloud(n2_bigrams)
+    cloud_fig = BytesIO()
+    cloud.save(cloud_fig, format='png')
+
+    pngImageB64String = "data:image/png;base64,"
+    pngImageB64String += base64.b64encode(cloud_fig.getvalue()).decode('utf8')
+
+    return pngImageB64String
+
+
 def get_donut_bs64():
 
     x = tweet_meta()
 
     tw_list = pd.DataFrame(x.tweet_list)
     tw_list["text"] = tw_list[0]
-    tw_list
 
     def remove_rt(x):
         return re.sub(r'RT @\w+: ', " ", x)

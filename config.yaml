@@ -11,7 +11,7 @@ meta:
     - "#nse"
     - "#bse"
     - "#nifty"
-    - "#twitter"
+    - "#nifty50"
 
 variables:
   connection_string: "sqlite:///dbs/tweet_dump.db"
@@ -61,6 +61,11 @@ url:
     pattern: /get_pie
     handler: FunctionHandler
     function: get_pie
+
+  get_wordcloud:
+    pattern: /get_wordcloud
+    handler: FunctionHandler
+    function: get_wordcloud
 
   # xxxxxx------------------------FN Handler----------------------------xxxxx
 

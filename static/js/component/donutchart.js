@@ -17,7 +17,7 @@ function plot_donut(config) {
   var _max_txt = _.maxBy(data, 'percentage')['name']
   // let color = d3.scaleOrdinal(d3.schemeCategory20c)
   // let color = d3.scaleOrdinal(d3.schemeCategory10)
-  let color = d3.scaleOrdinal(['#9ACD32', '#3C73FD', '#ED4433'])
+  let color = d3.scaleOrdinal(['#9ACD32', '#ABADE4', '#ED4433'])
     .domain(['positive', 'neutral', 'negative'])
 
 
