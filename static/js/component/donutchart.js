@@ -3,7 +3,7 @@
 function plot_donut(config) {
 
   let selector = config.selector || "body",
-    margin = config.margin || { top: 10, right: 25, bottom: 10, left: 25 },
+    margin = config.margin || { top: 10, right: 10, bottom: 10, left: 10 },
     width = config.width || $(selector).width(),
     height = config.height || $(selector).height(),
     radius = width / 4,
@@ -21,10 +21,12 @@ function plot_donut(config) {
     .domain(['positive', 'neutral', 'negative'])
 
 
+  let min_dim = d3.min([height, width])
+  let outer_rad = (radius - (radius * 0.25)) < 1 ? 10 : (radius - (radius * 0.25))
 
   var arc = d3.arc()
-    .outerRadius(radius - 32)
-    .innerRadius(100);
+    .outerRadius(outer_rad)
+    .innerRadius(Math.abs((min_dim / 2) - margin.top - margin.bottom));
 
   var pie = d3.pie()
     .sort(null)
@@ -81,7 +83,7 @@ function plot_donut(config) {
   g.append("text")
     .attr("text-anchor", "middle")
     .attr('font-size', '2em')
-    .attr('y', 20)
+    .attr('dy', '0.25em')
     .text(_max_txt)
 
   svg.append("g")
