@@ -108,7 +108,8 @@ class tweet_meta:
 
 def get_wordcloud_bs64():
     def create_wordcloud(text):
-        mask = np.array(Image.open("cloud.png"))
+        _path = os.path.join('static', 'img', 'cloud.png')
+        mask = np.array(Image.open(_path))
         stopwords = set(STOPWORDS)
         wc = WordCloud(background_color="white",
                        mask=mask,
