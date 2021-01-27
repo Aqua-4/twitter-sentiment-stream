@@ -2,3 +2,12 @@ pycryptodome==3.9.8
 pybase64
 tornado
 ldap3
+# websocket
+websocket_client
+tweepy
+SQLAlchemy
+nltk
+langdetect
+wordcloud
+pycountry
+textblob
