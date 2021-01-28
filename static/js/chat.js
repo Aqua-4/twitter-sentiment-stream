@@ -13,6 +13,7 @@
 // under the License.
 
 $(document).ready(function () {
+
   if (!window.console) window.console = {};
   if (!window.console.log) window.console.log = function () { };
 
@@ -28,6 +29,12 @@ $(document).ready(function () {
   });
 
   updater.start();
+
+  setInterval(function () {
+    plot_home()
+  }, 5000);
+
+
 });
 
 function newMessage(form) {
@@ -54,7 +61,7 @@ var updater = {
     updater.socket = new WebSocket(url);
     updater.socket.onmessage = function (event) {
       $("#tweet_div").text(JSON.parse(event.data).body)
-      plot_home()
+      // plot_home()
     }
   },
 
