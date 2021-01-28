@@ -17,3 +17,8 @@ drop_duplicate_query:
         ( SELECT MIN(rowid)
         FROM tweet_dump
         GROUP BY txt )
+
+1_day_query:
+  query:
+    SELECT * FROM tweet_dump
+      WHERE DATE(timestamp)>DATE('now','-1 days')

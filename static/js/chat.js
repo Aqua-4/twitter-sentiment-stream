@@ -32,7 +32,7 @@ $(document).ready(function () {
 
   setInterval(function () {
     plot_home()
-  }, 5000);
+  }, 15000);
 
 
 });

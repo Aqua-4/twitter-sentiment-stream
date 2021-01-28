@@ -13,8 +13,8 @@ url = CONFIG.get('variables')['connection_string']
 engine = create_engine(url)
 
 
-# drop_duplicate_query = queries.get('drop_duplicate_query').get('query')
-# engine.execute(drop_duplicate_query)
+drop_duplicate_query = queries.get('drop_duplicate_query').get('query')
+engine.execute(drop_duplicate_query)
 
 
 class Methods:

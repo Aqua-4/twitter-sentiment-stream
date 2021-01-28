@@ -55,6 +55,9 @@ function update_uri(obj) {
 function plot_home() {
 
   $.when(
+    // http://bl.ocks.org/lorenzopub/820bec1dafa6a5cd11aa23c1268edcbf
+    $("#word_cloud_holder").fadeTo("slow", 0.05)
+    ,
     $.ajax({
       url: "../get_donut",
       method: "POST",
@@ -63,9 +66,6 @@ function plot_home() {
       .done(function (data) {
         plot_donut({ selector: "#donut_chart_holder", data: data, height: 500 })
       })
-    ,
-    // http://bl.ocks.org/lorenzopub/820bec1dafa6a5cd11aa23c1268edcbf
-    $("#word_cloud_holder").fadeTo("slow", 0.05)
     ,
     $.ajax({
       url: "../get_wordcloud",

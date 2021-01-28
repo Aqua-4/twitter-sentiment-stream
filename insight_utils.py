@@ -28,15 +28,18 @@ import sys
 import tweepy
 import matplotlib.pyplot as plt
 import base64
+import yaml
 from io import BytesIO
+
 
 plt.style.use('ggplot')
 
 
-table_name = "tweet_dump"
-target = os.path.join('dbs', f'{table_name}.db')
-loc_conn = f'sqlite:///{target}'
-loc_engine = create_engine(loc_conn)
+CONFIG = yaml.safe_load(open('config.yaml', "r", encoding='utf-8'))
+queries = yaml.safe_load(open('queries.yaml', "r", encoding='utf-8'))
+url = CONFIG.get('variables')['connection_string']
+engine = create_engine(url)
+
 
 
 class tweet_meta:
@@ -52,7 +55,8 @@ class tweet_meta:
             r"(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", x)
 
     def __init__(self, filter=True):
-        self.df = pd.read_sql_table(table_name, con=loc_engine)
+        _query = queries.get('1_day_query').get('query')
+        self.df = pd.read_sql(_query, con=engine)
         self.df.drop_duplicates(inplace=True, subset=['txt'])
         if filter:
             self.df['txt'] = self.df['txt'].map(self.remove_rt).map(self.rt)
