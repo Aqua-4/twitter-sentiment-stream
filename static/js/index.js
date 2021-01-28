@@ -54,15 +54,20 @@ function update_uri(obj) {
 
 function plot_home() {
 
-  $.when(
-    $.ajax({
-      url: "../get_donut",
-      method: "POST",
-      dataType: 'json'
+  // $.when(
+  //   )
+  //   .then(function () {
+  //     $(".loader").addClass("d-none");
+  //   })
+  $.ajax({
+    url: "../get_donut",
+    method: "POST",
+    dataType: 'json',
+    async: false
+  })
+    .done(function (data) {
+      plot_donut({ selector: "#donut_chart_holder", data: data, height: 500 })
     })
-      .done(function (data) {
-        plot_donut({ selector: "#donut_chart_holder", data: data, height: 500 })
-      })
     ,
     // http://bl.ocks.org/lorenzopub/820bec1dafa6a5cd11aa23c1268edcbf
     $("#word_cloud_holder").fadeTo("slow", 0.05)
@@ -70,7 +75,8 @@ function plot_home() {
     $.ajax({
       url: "../get_wordcloud",
       method: "POST",
-      dataType: 'json'
+      dataType: 'json',
+      async: false
     })
       .done(function (data) {
         // $("#word_cloud_holder").empty()
@@ -78,9 +84,6 @@ function plot_home() {
         $("#word_cloud_holder").fadeTo("slow", 1)
         $("#word_cloud_holder").attr("src", data.img)
       })
-  )
-    .then(function () {
-      $(".loader").addClass("d-none");
-    })
+  $(".loader").addClass("d-none");
 
 }
