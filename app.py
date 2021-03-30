@@ -732,10 +732,13 @@ def main():
         char = random.choice(characters)
         cook_sec = cook_sec + char
 
-    consumer_key = 'LAjTEjBk13C9C5gb8MDWyuS6v'
-    consumer_secret = 'EdvCXEfPLn9WNUJY5zo6QoaSm7y7mZAubVrGMjOwFcBVQBBx2l'
-    access_token = '147895435-alx1Xd58t4zWZenhrTRDgLiXCkJplT9fQJhsyyFR'
-    access_secret = 'x9h7ZyjZfwwdnAoQAkuTlprpwJsztEeDwrokK7K6Ti7lz'
+    _secret_conf = yaml.safe_load(open('.secrets.yaml', "r", encoding='utf-8'))
+    twitter_secret = _secret_conf['twitter_secret']
+
+    consumer_key = twitter_secret.get('consumer_key')
+    consumer_secret = twitter_secret.get('consumer_secret')
+    access_token = twitter_secret.get('access_token')
+    access_secret = twitter_secret.get('access_secret')
 
     auth = OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_secret)
